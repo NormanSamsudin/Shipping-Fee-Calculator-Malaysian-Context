@@ -1,0 +1,107 @@
+doctype html
+html
+  head
+    meta(charset='utf-8')
+    title Shipping Rate Calculator
+    link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css')
+    script(src="https://code.jquery.com/jquery-3.6.0.min.js")
+    style.
+      .loading {
+        display: none;
+      }
+  body
+    .container
+      .modal-dialog
+        .modal-content
+          // Modal Header
+          .modal-header
+            button.close(type="button", data-dismiss="modal")
+              span(aria-hidden="true") ×
+              span.sr-only Close
+            h4#myModalLabel.modal-title
+              | Shipping Rate Calculator
+          // Modal Body
+          .modal-body
+            form#shipping-form(role='form', method='POST', action='http://127.0.0.1:8000/api/v1/logistic/logistic-jnt-city')
+              div.form-group
+                label(for="shipping_rates_type") Shipping Rates Type:
+                select#shipping_type.form-control(name="shipping_type" required)
+                  option(value="domestic") Domestic
+                  option(value="international") International
+              div.form-group
+                label(for="sender_postcode") Sender Postcode:
+                input#sender_postcode.form-control(type="text" name="sender_postcode" required placeholder="Enter sender postcode")
+              div.form-group
+                label(for="receiver_postcode") Receiver Postcode:
+                input#receiver_postcode.form-control(type="text" name="receiver_postcode" required placeholder="Enter receiver postcode")
+              div.form-group
+                label(for="destination_country") Destination Country:
+                input#destination_country.form-control(type="text" name="destination_country" required placeholder="Enter destination country")
+              div.form-group
+                label(for="shipping_type") Shipping Type:
+                select#shipping_type.form-control(name="shipping_type" required)
+                  option(value="EZ") Regular
+                  option(value="EX") Next Day Delivery
+              div.form-group
+                label(for="weight") Weight:
+                input#weight.form-control(type="number" name="weight" required placeholder="Enter weight")
+              div.form-group
+                label(for="length") Length:
+                input#length.form-control(type="number" name="length" required placeholder="Enter length")
+              div.form-group
+                label(for="width") Width:
+                input#width.form-control(type="number" name="width" required placeholder="Enter width")
+              div.form-group
+                label(for="height") Height:
+                input#height.form-control(type="number" name="height" required placeholder="Enter height")
+              div.form-group
+                label(for="item_value") Item Value:
+                input#item_value.form-control(type="number" name="item_value" required placeholder="Enter item value")
+              button.btn.btn-primary(type="submit") Calculate Shipping Rate
+              button.btn.btn-default(type="button", data-dismiss="modal")
+                | Close
+            div.loading(id="loading") Loading...
+            div#response
+          // Modal Footer
+          .modal-footer
+            h4.footer
+              | Footer Text
+    script.
+      $(document).ready(function() {
+        $('#shipping-form').on('submit', function(event) {
+          event.preventDefault();
+          $('#response').empty();
+          
+          const formData = {
+            shipping_rates_type: $('#shipping_rates_type').val(),
+            sender_postcode: $('#sender_postcode').val(),
+            receiver_postcode: $('#receiver_postcode').val(),
+            destination_country: $('#destination_country').val(),
+            shipping_type: $('#shipping_type').val(),
+            weight: $('#weight').val(),
+            length: $('#length').val(),
+            width: $('#width').val(),
+            height: $('#height').val(),
+            item_value: $('#item_value').val()
+          };
+
+          $('#loading').show(); // Show loading spinner
+
+          $.ajax({
+            type: 'POST',
+            url: '/api/v1/logistic/logistic-jnt-city',
+            data: JSON.stringify(formData),
+            contentType: 'application/json',
+            success: function(response) {
+              $('#loading').hide(); // Hide loading spinner on success
+              $('#response').html('Shipping Rate: ' + response.data.rate);
+              console.log('Response:', response); // Log the entire response object
+            },
+            error: function(error) {
+              $('#loading').hide(); // Hide loading spinner on error
+              $('#response').html('Error: ' + error.responseText);
+              console.error('Error:', error); // Log the error object
+            }
+          });
+        });
+      });
