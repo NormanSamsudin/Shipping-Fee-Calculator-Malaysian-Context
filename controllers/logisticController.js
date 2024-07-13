@@ -17,8 +17,7 @@ exports.getShippingRateJNT = catchAsync(async (req, res, next) => {
     weight,
     length,
     width,
-    height,
-    item_value
+    height
   } = req.body;
 
   // Create the payload
@@ -33,7 +32,7 @@ exports.getShippingRateJNT = catchAsync(async (req, res, next) => {
     length,
     width,
     height,
-    item_value
+    item_value: ''
   });
 
   // Make the POST request to the logistic API
@@ -72,7 +71,7 @@ exports.getShippingRateJNT = catchAsync(async (req, res, next) => {
     }
   });
 
-  res.json({ shippingRate: shippingRate });
+  res.json({ shippingRate: Number(shippingRate) });
 });
 
 exports.getShippingRateCityLink = catchAsync(async (req, res, next) => {
@@ -87,8 +86,7 @@ exports.getShippingRateCityLink = catchAsync(async (req, res, next) => {
     width,
     height,
     selected_type,
-    parcel_weight,
-    document_weight
+    parcel_weight
   } = req.body;
 
   // Create the payload
@@ -104,7 +102,7 @@ exports.getShippingRateCityLink = catchAsync(async (req, res, next) => {
     height,
     selected_type,
     parcel_weight,
-    document_weight
+    document_weight: ''
   });
 
   // Define request headers
@@ -186,8 +184,7 @@ exports.middlewareShippingRateJNT = catchAsync(async (req, res, next) => {
     weight,
     length,
     width,
-    height,
-    item_value
+    height
   } = req.body;
 
   // Create the payload
@@ -202,7 +199,7 @@ exports.middlewareShippingRateJNT = catchAsync(async (req, res, next) => {
     length,
     width,
     height,
-    item_value
+    item_value: ''
   });
 
   // Make the POST request to the logistic API
@@ -259,8 +256,7 @@ exports.middlewareShippingRateCityLink = catchAsync(async (req, res, next) => {
     width,
     height,
     selected_type,
-    parcel_weight,
-    document_weight
+    parcel_weight
   } = req.body;
 
   // Create the payload
@@ -276,7 +272,7 @@ exports.middlewareShippingRateCityLink = catchAsync(async (req, res, next) => {
     height,
     selected_type,
     parcel_weight,
-    document_weight
+    document_weight: ''
   });
 
   // Define request headers

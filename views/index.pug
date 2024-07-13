@@ -36,7 +36,10 @@ html
                 input#receiver_postcode.form-control(type="text" name="receiver_postcode" required placeholder="Enter receiver postcode")
               div.form-group
                 label(for="destination_country") Destination Country:
-                input#destination_country.form-control(type="text" name="destination_country" required placeholder="Enter destination country")
+                select#destination_country.form-control(name="destination_country" required)
+                  option(value="MY") Malaysia
+                  option(value="NZ") Brazil
+                  option(value="BZ") Indonesia
               div.form-group
                 label(for="shipping_type") Shipping Type:
                 select#shipping_type.form-control(name="shipping_type" required)
@@ -54,9 +57,6 @@ html
               div.form-group
                 label(for="height") Height:
                 input#height.form-control(type="number" name="height" required placeholder="Enter height")
-              div.form-group
-                label(for="item_value") Item Value:
-                input#item_value.form-control(type="number" name="item_value" required placeholder="Enter item value")
               button.btn.btn-primary(type="submit") Calculate Shipping Rate
               button.btn.btn-default(type="button", data-dismiss="modal")
                 | Close
