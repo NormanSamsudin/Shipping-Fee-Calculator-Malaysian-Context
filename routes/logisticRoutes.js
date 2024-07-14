@@ -69,9 +69,6 @@ module.exports = logisticRouter;
  *               height:
  *                 type: number
  *                 example: 50
- *               item_value:
- *                 type: string
- *                 example: ""
  *     responses:
  *       200:
  *         description: Successful calculation of shipping rate.
@@ -134,9 +131,6 @@ module.exports = logisticRouter;
  *               parcel_weight:
  *                 type: number
  *                 example: 14
- *               document_weight:
- *                 type: string
- *                 example: ""
  *     responses:
  *       200:
  *         description: Successful calculation of shipping rate.
@@ -199,9 +193,6 @@ module.exports = logisticRouter;
  *               parcel_weight:
  *                 type: number
  *                 example: 14
- *               document_weight:
- *                 type: string
- *                 example: ""
  *               shipping_rates_type:
  *                 type: string
  *                 example: "domestic"
@@ -217,9 +208,6 @@ module.exports = logisticRouter;
  *               weight:
  *                 type: number
  *                 example: 20
- *               item_value:
- *                 type: string
- *                 example: ""
  *     responses:
  *       200:
  *         description: Successful calculation of shipping rates.
