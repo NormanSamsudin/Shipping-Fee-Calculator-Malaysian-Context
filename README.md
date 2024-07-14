@@ -164,12 +164,14 @@ or Testing
 
 ```bash
   http://127.0.0.1:8000/api-docs/
+  https://<ngrok-free.app>:8000/api-docs/
 ```
 
 - Form Submission
 
 ```bash
   http://127.0.0.1:8000/index.html
+  https://<ngrok-free.app>:8000/index.html
 ```
 
 - Postman
