@@ -2,10 +2,7 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const Logistic = require('./../models/logisticModel');
 const catchAsync = require('./../utils/catchAsync');
-//const factory = require('./handlerFactory');
-
 const AppError = require('./../utils/AppError');
-//const factory = require('./handlerFactory');
 
 exports.getShippingRateJNT = catchAsync(async (req, res, next) => {
   const {
