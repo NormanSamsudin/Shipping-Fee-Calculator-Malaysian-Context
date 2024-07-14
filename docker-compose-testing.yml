@@ -22,8 +22,9 @@ services:
       - /usr/src/app/node_modules
     environment:
       - PORT=8000
-      - NODE_ENV=development
+      - NODE_ENV=testing
       - DATABASE_LINK=mongodb://mongodb:27017/rateCalculator?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.0.0
+      - NGROK_AUTHTOKEN=2iMAMjsxKNJUABhg6y1MAYNCnZY_6hXg5naXLefKKdjJ3afGe
     command: sh -c 'node server.js'
     depends_on:
       - mongodb

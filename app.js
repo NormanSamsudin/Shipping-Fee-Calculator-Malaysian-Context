@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const ngrok = require('@ngrok/ngrok');
 const fs = require('fs');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
@@ -34,15 +35,24 @@ app.use(
   })
 );
 
-// setup log dalam terminal bila run dalam development envronment
-console.log(process.env.NODE_ENV);
-if (process.env.NODE_ENV === 'development') {
+console.log('Environment: ', process.env.NODE_ENV);
+if (process.env.NODE_ENV === 'testing') {
   app.use(
     morgan('common', {
       stream: fs.createWriteStream('./access.log', { flags: 'a' })
     })
   );
   app.use(morgan('dev'));
+} else {
+  app.use(morgan('dev'));
+}
+
+if (process.env.NODE_ENV === 'testing') {
+  //Port Forward
+  ngrok
+    .connect({ addr: process.env.PORT, authtoken_from_env: true })
+    .then(listener => console.log(`Ngrok established at: ${listener.url()}`))
+    .catch(error => console.log('Error connecting ngrok:', error));
 }
 
 const limiter = rateLimit({

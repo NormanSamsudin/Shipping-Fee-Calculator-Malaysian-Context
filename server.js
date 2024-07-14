@@ -18,11 +18,8 @@ dotenv.config({ path: './config.env' });
 
 const app = require('./app');
 
-const DB = process.env.DATABASE_LOCAL.replace(
-  '<PASSWORD>',
-  process.env.DATABASE_PASSWORD
-);
-
+const DB = process.env.DATABASE_LINK;
+console.log('Link: ', DB);
 mongoose
   .connect(DB, {
     // useNewUrlParser: true,
@@ -34,7 +31,7 @@ mongoose
     // console.log(con.connections);
     console.log('DB Connected...');
   })
-  .catch(err => console.log(err));
+  .catch(err => console.log('DB LOCAL ERROR:', err));
 
 const port = process.env.PORT || 8000;
 const server = app.listen(port, () => {
