@@ -19,6 +19,7 @@ logisticRouter
 logisticRouter
   .route('/logistic-jnt-city')
   .post(
+    logisticController.chechCachePreviousRequest,
     logisticController.fetchSessionMiddlewareJNT,
     logisticController.middlewareShippingRateJNT,
     logisticController.middlewareShippingRateCityLink,

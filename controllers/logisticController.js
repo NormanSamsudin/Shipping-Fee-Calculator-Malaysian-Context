@@ -1,10 +1,10 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
-//const Logistic = require('./../models/logisticModel');
+const Logistic = require('./../models/logisticModel');
 const catchAsync = require('./../utils/catchAsync');
 //const factory = require('./handlerFactory');
 
-//const AppError = require('./../utils/AppError');
+const AppError = require('./../utils/AppError');
 //const factory = require('./handlerFactory');
 
 exports.getShippingRateJNT = catchAsync(async (req, res, next) => {
@@ -54,24 +54,27 @@ exports.getShippingRateJNT = catchAsync(async (req, res, next) => {
     }
   );
 
-  const $ = cheerio.load(response.data);
-  let shippingRate;
+  if (response) {
+    const $ = cheerio.load(response.data);
+    let shippingRate;
 
-  $('tr').each((i, element) => {
-    const thText = $(element)
-      .find('th')
-      .text()
-      .trim();
-    if (thText === 'Shipping Rates') {
-      shippingRate = $(element)
-        .find('td')
-        .first()
+    $('tr').each((i, element) => {
+      const thText = $(element)
+        .find('th')
         .text()
         .trim();
-    }
-  });
-
-  res.json({ shippingRate: Number(shippingRate) });
+      if (thText === 'Shipping Rates') {
+        shippingRate = $(element)
+          .find('td')
+          .first()
+          .text()
+          .trim();
+      }
+    });
+    res.json({ shippingRate: Number(shippingRate) });
+  } else {
+    return next(new AppError('API J&T Not Found', 404));
+  }
 });
 
 exports.getShippingRateCityLink = catchAsync(async (req, res, next) => {
@@ -135,42 +138,58 @@ exports.getShippingRateCityLink = catchAsync(async (req, res, next) => {
     }
   );
 
-  res.json({
-    shippingRate: response.data.req.data.rate
-  });
+  if (response) {
+    res.json({
+      shippingRate: response.data.req.data.rate
+    });
+  } else {
+    return next(new AppError('API CityLink Not Found', 404));
+  }
 });
 
 exports.getShippingRateCityLinkAndJNT = catchAsync(async (req, res, next) => {
-  res.send({
-    data: [
-      {
-        courier: 'cityLink',
-        rate: res.cityLinkRate
-      },
-      {
-        courier: 'jnt',
-        rate: res.jntRate
-      }
-    ]
-  });
+  //caching req into database
+  req.body.jnt = res.jntRate;
+  req.body.city_link = res.cityLinkRate;
+
+  const doc = await Logistic.create(req.body);
+
+  if (doc) {
+    res.send({
+      data: [
+        {
+          courier: 'cityLink',
+          rate: res.cityLinkRate
+        },
+        {
+          courier: 'jnt',
+          rate: res.jntRate
+        }
+      ]
+    });
+  } else {
+    return next(new AppError('Failed to create logistic data', 500));
+  }
 });
 
 //Middleware to get session (JNT)
 exports.fetchSessionMiddlewareJNT = catchAsync(async (req, res, next) => {
-  //GET request
   const response = await axios.get('https://www.jtexpress.my/shipping-rates');
-  /// Log session (cookies) information to the console
-  //console.log('Session Info:', response.headers['set-cookie']);
-  req.sessionInfo = response.headers['set-cookie'];
 
-  // Parse the HTML to extract the CSRF token
-  const $ = cheerio.load(response.data);
-  const csrfToken = $('input[name="_token"]').val();
+  if (response) {
+    req.sessionInfo = response.headers['set-cookie'];
 
-  // Attach CSRF token to request object
-  req.csrfToken = csrfToken;
+    // Parse the HTML to extract the CSRF token
+    const $ = cheerio.load(response.data);
+    const csrfToken = $('input[name="_token"]').val();
 
-  next();
+    // Attach CSRF token to request object
+    req.csrfToken = csrfToken;
+
+    next();
+  } else {
+    return next(new AppError('Fetch Session Failed', 404));
+  }
 });
 
 //Middleware POST Request JNT
@@ -206,7 +225,6 @@ exports.middlewareShippingRateJNT = catchAsync(async (req, res, next) => {
   const response = await axios.post(
     'https://www.jtexpress.my/shipping-rates',
     payload,
-
     {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -221,29 +239,32 @@ exports.middlewareShippingRateJNT = catchAsync(async (req, res, next) => {
     }
   );
 
-  const $ = cheerio.load(response.data);
-  let shippingRate;
+  if (response) {
+    const $ = cheerio.load(response.data);
+    let shippingRate;
 
-  $('tr').each((i, element) => {
-    const thText = $(element)
-      .find('th')
-      .text()
-      .trim();
-    if (thText === 'Shipping Rates') {
-      shippingRate = $(element)
-        .find('td')
-        .first()
+    $('tr').each((i, element) => {
+      const thText = $(element)
+        .find('th')
         .text()
         .trim();
-    }
-  });
+      if (thText === 'Shipping Rates') {
+        shippingRate = $(element)
+          .find('td')
+          .first()
+          .text()
+          .trim();
+      }
+    });
 
-  res.jntRate = Number(shippingRate);
-  next();
+    res.jntRate = Number(shippingRate);
+    next();
+  } else {
+    return next(new AppError('API JNT Not Found', 404));
+  }
 });
 
 //Middleware POST Request City-Link
-
 exports.middlewareShippingRateCityLink = catchAsync(async (req, res, next) => {
   const {
     origin_country,
@@ -305,6 +326,34 @@ exports.middlewareShippingRateCityLink = catchAsync(async (req, res, next) => {
     }
   );
 
-  res.cityLinkRate = response.data.req.data.rate;
+  if (response) {
+    res.cityLinkRate = response.data.req.data.rate;
+    next();
+  } else {
+    return next(new AppError('API City-Link Not Found', 404));
+  }
+});
+
+// Middleware to check if the previous request was made
+exports.chechCachePreviousRequest = catchAsync(async (req, res, next) => {
+  const doc = await Logistic.findOne(req.body);
+
+  if (doc) {
+    // If the document exists, send a response with the cached data
+    return res.status(200).json({
+      data: [
+        {
+          courier: 'cityLink',
+          rate: doc.city_link
+        },
+        {
+          courier: 'jnt',
+          rate: doc.jnt
+        }
+      ]
+    });
+  }
+
+  // If no document is found, proceed to the next middleware
   next();
 });

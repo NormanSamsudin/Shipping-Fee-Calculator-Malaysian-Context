@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const morgan = require('morgan');
@@ -19,11 +20,28 @@ app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 
 // securityhttp headers
-app.use(helmet());
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+      'script-src': [
+        "'self'",
+        "'unsafe-inline'",
+        'code.jquery.com',
+        '127.0.0.1'
+      ]
+    }
+  })
+);
 
 // setup log dalam terminal bila run dalam development envronment
 console.log(process.env.NODE_ENV);
 if (process.env.NODE_ENV === 'development') {
+  app.use(
+    morgan('common', {
+      stream: fs.createWriteStream('./access.log', { flags: 'a' })
+    })
+  );
   app.use(morgan('dev'));
 }
 
@@ -54,10 +72,6 @@ app.use(express.json({ limit: '10kb' }));
 // untuk nak serve frontend kita
 app.use(express.static('public'));
 
-app.get('/', (req, res) => {
-  res.status(200).render('index');
-});
-
 //swagger
 const options = {
   definition: {
@@ -79,17 +93,13 @@ const options = {
 
 const specs = swaggerJsdoc(options);
 
-app.use(
-  '/api-docs',
-  swaggerUi.serve,
-  swaggerUi.setup(specs, {
-    // explorer: true,
-    // customCssUrl:
-    //   'https://cdn.jsdelivr.net/npm/swagger-ui-themes@3.0.0/themes/3.x/theme-newspaper.css'
-  })
-);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {}));
 
 app.use('/api/v1/logistic', logisticRoutes);
+
+app.get('/', (req, res) => {
+  res.status(200).render('index');
+});
 
 //untuk route yang tak wujud
 app.all('*', (req, res, next) => {
