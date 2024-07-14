@@ -1,5 +1,4 @@
 const express = require('express');
-const path = require('path');
 const ngrok = require('@ngrok/ngrok');
 const fs = require('fs');
 const swaggerJsdoc = require('swagger-jsdoc');
@@ -15,10 +14,6 @@ const logisticRoutes = require('./routes/logisticRoutes');
 
 // 1) GLOBAL MIDDLEWARE
 const app = express();
-
-//set pug template engine
-app.set('view engine', 'pug');
-app.set('views', path.join(__dirname, 'views'));
 
 // securityhttp headers
 app.use(
@@ -106,10 +101,6 @@ const specs = swaggerJsdoc(options);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {}));
 
 app.use('/api/v1/logistic', logisticRoutes);
-
-app.get('/', (req, res) => {
-  res.status(200).render('index');
-});
 
 //untuk route yang tak wujud
 app.all('*', (req, res, next) => {

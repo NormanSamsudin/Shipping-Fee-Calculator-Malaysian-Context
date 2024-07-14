@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Shipping Rate Calculator</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    .loading {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+          <h4 id="myModalLabel" class="modal-title">Shipping Rate Calculator</h4>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="modal-body">
+          <form id="shipping-form" role="form" method="POST" action="http://127.0.0.1:8000/api/v1/logistic/logistic-jnt-city">
+            <div class="form-group">
+              <label for="shipping_rates_type">Shipping Rates Type:</label>
+              <select id="shipping_rates_type" class="form-control" name="shipping_rates_type" required>
+                <option value="domestic">Domestic</option>
+                <option value="international">International</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="origin_postcode">Sender Postcode:</label>
+              <input id="origin_postcode" class="form-control" type="text" name="origin_postcode" required placeholder="Enter sender postcode">
+            </div>
+            <div class="form-group">
+              <label for="destination_postcode">Receiver Postcode:</label>
+              <input id="destination_postcode" class="form-control" type="text" name="destination_postcode" required placeholder="Enter receiver postcode">
+            </div>
+            <div class="form-group">
+              <label for="destination_country">Destination Country:</label>
+              <select id="destination_country" class="form-control" name="destination_country" required>
+                <option value="MY">Malaysia</option>
+                <option value="IND">Indonesia</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="origin_country">Origin Country:</label>
+              <select id="origin_country" class="form-control" name="origin_country" required>
+                <option value="MY">Malaysia</option>
+                <option value="IND">Indonesia</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="destination_state">Destination State:</label>
+              <select id="destination_state" class="form-control" name="destination_state" required>
+                <option value="Kuala Lumpur">Kuala Lumpur</option>
+                <option value="Selangor">Selangor</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="origin_state">Origin State:</label>
+              <select id="origin_state" class="form-control" name="origin_state" required>
+                <option value="Kuala Lumpur">Kuala Lumpur</option>
+                <option value="Selangor">Selangor</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="shipping_type">Shipping Type:</label>
+              <select id="shipping_type" class="form-control" name="shipping_type" required>
+                <option value="EZ">Regular</option>
+                <option value="EX">Next Day Delivery</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="parcel_weight">Weight:</label>
+              <input id="parcel_weight" class="form-control" type="number" name="parcel_weight" required placeholder="Enter weight">
+            </div>
+            <div class="form-group">
+              <label for="length">Length:</label>
+              <input id="length" class="form-control" type="number" name="length" required placeholder="Enter length">
+            </div>
+            <div class="form-group">
+              <label for="width">Width:</label>
+              <input id="width" class="form-control" type="number" name="width" required placeholder="Enter width">
+            </div>
+            <div class="form-group">
+              <label for="height">Height:</label>
+              <input id="height" class="form-control" type="number" name="height" required placeholder="Enter height">
+            </div>
+            <div class="form-group">
+              <label for="selected_type">Item Type:</label>
+              <select id="selected_type" class="form-control" name="selected_type" required>
+                <option value="1">Parcel</option>
+                <option value="2">Document</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" type="submit">Calculate Shipping Rate</button>
+            <button class="btn btn-default" type="button" data-dismiss="modal">Close</button>
+          </form>
+          <div class="loading" id="loading">Loading...</div>
+          <div id="response"></div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="modal-footer">
+          <h4 class="footer"></h4>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    $(document).ready(function() {
+      $('#shipping-form').on('submit', function(event) {
+        event.preventDefault();
+        $('#loading').show();
+        $('#response').empty();
+
+        // Set hidden fields' values
+        $('#receiver_postcode').val($('#destination_postcode').val());
+        $('#sender_postcode').val($('#origin_postcode').val());
+        $('#weight').val($('#parcel_weight').val());
+
+        // Serialize form data
+        const formData = $(this).serialize();
+
+        $.ajax({
+            type: 'POST',
+            url: $(this).attr('action'),
+            data: formData,
+            success: function(response) {
+                try {
+
+                const jntRate = response.data.find(item => item.courier === 'jnt').rate;
+                const cityLinkRate = response.data.find(item => item.courier === 'cityLink').rate;
+
+                $('#loading').hide();
+                $('#response').html('Shipping Rate: J&T = ' + jntRate + ', City-Link = ' + cityLinkRate);
+                } catch (error) {
+                $('#loading').hide();
+                $('#response').html('Error: Response Error');
+                }
+            },
+            error: function(error) {
+                $('#loading').hide();
+                $('#response').html('Error: ' + error.responseText);
+            }
+            });
+      });
+    });
+  </script>
+</body>
+</html>
