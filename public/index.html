@@ -133,7 +133,6 @@
             data: formData,
             success: function(response) {
                 try {
-
                 const jntRate = response.data.find(item => item.courier === 'jnt').rate;
                 const cityLinkRate = response.data.find(item => item.courier === 'cityLink').rate;
 
